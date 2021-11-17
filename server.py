@@ -41,20 +41,10 @@ serverSocket.listen(1)
 print('Server listening on ' + str(hostIP) + ':' + str(serverPort))
 
 # data package to be sent:
-"""
-data =  "HTTP/1.1 200 OK\r\n"\
-        "Content-Type: text/html; charset=UTF-8\r\n\r\n"\
-        "<html>Congratulations!  You've downloaded the first Wireshark lab"\
-        "file!</html>\r\n"
- """
 
-data = '''\t################################################################
-\t#                                                              #
-\t#                                                              #
-\t#               Welcome to Client-Server-Trivia!               #
-\t#                                                              #
-\t#                                                              #
-\t################################################################'''
+welcome  = 'Welcome to Client-Server-Trivia! Would you like to play? (yes or no)'
+newRound = 'Wanna play again? (yes or no)'
+thanks   = 'Thanks for playing, bye!\n'
 
 # buffer size in bytes accepted by connection socket:
 BUFSIZE = 2048
@@ -64,20 +54,24 @@ while True:
     # client knocks on door and a new socket, connectionSocket, is created:
     connectionSocket, addr = serverSocket.accept()      
     # [3> tutorial ref for printing address info:
+    print ('------------------------- SERVER  --------------------------------')
     print(f"Connected by {addr}\n")
-    # receive msg back [3>:
-    segments = []
+    # [4> https://www.geeksforgeeks.org/simple-chat-room-using-python/
+    count = 0
     while True:
-        portion = connectionSocket.recv(BUFSIZE)
-        segments.append(portion)
-        if len(portion) <= BUFSIZE:
-            break
-    msg = b''.join(segments)
-    print('Received: ', msg)
-    connectionSocket.send(data.encode())
-    print('\nSending>>>>>>>>')
-    print(data)
-    print('<<<<<<<<')
-    connectionSocket.close()
+        msgRcv = connectionSocket.recv(BUFSIZE).decode()
+        print('from client: ' + msgRcv)
+        if msgRcv == "init":
+            sendMsg = welcome
+        elif msgRcv == "yes":
+            sendMsg = newRound
+        elif msgRcv == "no":
+            sendMsg = thanks
 
+        print('\nSending>>>>>>>>')
+        connectionSocket.send(sendMsg.encode())
+        print(sendMsg)
+        continue
+
+connectionSocket.close()
 # note, serverSocket remains open to welcome new handshakes from clients

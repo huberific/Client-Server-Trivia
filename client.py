@@ -26,8 +26,6 @@ if len(sys.argv) != 2:
 server     = 'flip1.engr.oregonstate.edu'
 path       = '/'
 serverPort = int(sys.argv[1])
-version    = 'HTTP/1.1'
-method     = 'GET'
 
 # client socket created. AF_INET indicates IPv4, SOCK_STREAM indicates TCP.
 # the server socket is the welcoming socket (handshake):
@@ -40,22 +38,28 @@ clientSocket = socket(AF_INET, SOCK_STREAM)
 clientSocket.connect((server, serverPort))
 
 # message sent to server:
-msg = method + ' ' + path + ' ' + version + '\r\nHost:' + server + '\r\n\r\n'
+# msg = method + ' ' + path + ' ' + version + '\r\nHost:' + server + '\r\n\r\n'
 
-print('Request: ' + method + ' ' + path + ' ' + version)
-print('Host: ' + server)
+msg = "init"
 
-# send bytes to server, then wait for response:
-clientSocket.send(msg.encode())
+count = 0
 
-# size of buffer to receive message in bytes:
-BUFSIZE = 4096
+while True:
+    if msg == "no":
+        clientSocket.close()
+        break
 
-# place characters from server in variable:
-msgBack = clientSocket.recv(BUFSIZE)
+    # send bytes to server, then wait for response:
+    clientSocket.send(msg.encode())
 
-# print message length and message received from server:
-print ('\n\n[RECV] - length:', len(msgBack))
-print(msgBack.decode())
-
-clientSocket.close()
+    # size of buffer to receive message in bytes:
+    BUFSIZE = 4096
+    
+    # place characters from server in variable:
+    msgBack = clientSocket.recv(BUFSIZE)
+    
+    # print message length and message received from server:
+    print('server: ' + msgBack.decode())
+    
+    msg = input ("client: ")
+    msg = msg.rstrip('\n')
