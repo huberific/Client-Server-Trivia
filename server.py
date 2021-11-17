@@ -1,7 +1,7 @@
 ################################################################################
-# Due Date:    10-17-2021
+# Due Date:    12-05-2021
 # Author:      Aaron Huber
-# Title:       Project 1 - Sockets and HTTP (Server File) 
+# Title:       Project 4 - Client-Server-Trivia
 # Description: This program creates the server-side socket for accepting
 #              incoming messages and sending responses.
 #
@@ -15,13 +15,14 @@
 #   Socket receiving large files:
 #   [3> https://stackoverflow.com/questions/17667903/
 #       python-socket-receive-large-amount-of-data
-##############################################################################k
+###############################################################################
 
 # [1> throughout
 # socket module forms basis for network communication in python:
 import socket
+import random
 
-serverPort = 59897                              # arbitrary port number
+serverPort = int(random.uniform(49152, 65535))  # arbitrary port number
 server     = socket.gethostname()               # get host name of server
 hostIP     = socket.gethostbyname(server)       # get IP address of server
 
@@ -40,10 +41,20 @@ serverSocket.listen(1)
 print('Server listening on ' + str(hostIP) + ':' + str(serverPort))
 
 # data package to be sent:
+"""
 data =  "HTTP/1.1 200 OK\r\n"\
         "Content-Type: text/html; charset=UTF-8\r\n\r\n"\
         "<html>Congratulations!  You've downloaded the first Wireshark lab"\
         "file!</html>\r\n"
+ """
+
+data = '''\t################################################################
+\t#                                                              #
+\t#                                                              #
+\t#               Welcome to Client-Server-Trivia!               #
+\t#                                                              #
+\t#                                                              #
+\t################################################################'''
 
 # buffer size in bytes accepted by connection socket:
 BUFSIZE = 2048
