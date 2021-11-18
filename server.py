@@ -21,6 +21,46 @@
 # socket module forms basis for network communication in python:
 import socket
 import random
+import urllib.request, json
+
+def printOptions(options):
+    for o in options:
+        print(o)
+
+def fixQuotes(options):
+    for o in options:
+        o = o.replace("&quot;", '"')
+    for o in options:
+        o = o.replace("&#039;", "'")
+    return options
+
+def fixQuotesStr(str):
+    str = str.replace("&quot;", '"')
+    str = str.replace("&#039;", "'")
+    str = str.replace("&amp;", '&')
+    return str
+
+def format(question, options, answer):
+    optionNum = 1
+    payload = question + '\n'
+    optionStr = 
+
+# function to get trivia json info:
+def loadQuestion():
+    with urllib.request.urlopen("https://opentdb.com/api.php?amount=1") as url:
+        jsonData = json.loads(url.read().decode()) # returns json data
+        question = jsonData["results"][0]["question"]
+        options  = jsonData["results"][0]["incorrect_answers"]
+        answer   = jsonData["results"][0]["correct_answer"]
+        question = fixQuotesStr(question)
+        answer   = fixQuotesStr(answer)
+        options  = fixQuotes(options)
+        options.append(answer)
+        random.shuffle(options)
+        fullQuestion = [question, options, answer]
+        return fullQuestion
+
+# [ref> https://www.delftstack.com/howto/python/dict-to-string-in-python/
 
 serverPort = int(random.uniform(49152, 65535))  # arbitrary port number
 server     = socket.gethostname()               # get host name of server
@@ -64,6 +104,17 @@ while True:
         if msgRcv == "init":
             sendMsg = welcome
         elif msgRcv == "yes":
+            fullQuestion = loadQuestion()
+            question = fullQuestion[0]
+            options = fullQuestion[1]
+            answer = fullQuestion[2]
+            payload = format(question, options, answer)
+            print('\nSending>>>>>>>>')
+            print("question: " + question)
+            print("options: ")
+            printOptions(options)
+            print("answer: " + answer)
+            connectionSocket.send(question.encode())
             sendMsg = newRound
         elif msgRcv == "no":
             sendMsg = thanks

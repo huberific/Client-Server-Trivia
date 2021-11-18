@@ -44,6 +44,10 @@ msg = "init"
 
 count = 0
 
+# size of buffer to receive message in bytes:
+BUFSIZE = 4096
+    
+
 while True:
     if msg == "no":
         clientSocket.close()
@@ -52,9 +56,6 @@ while True:
     # send bytes to server, then wait for response:
     clientSocket.send(msg.encode())
 
-    # size of buffer to receive message in bytes:
-    BUFSIZE = 4096
-    
     # place characters from server in variable:
     msgBack = clientSocket.recv(BUFSIZE)
     
