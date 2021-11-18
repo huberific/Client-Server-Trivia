@@ -27,23 +27,41 @@ def printOptions(options):
     for o in options:
         print(o)
 
-def fixQuotes(options):
-    for o in options:
-        o = o.replace("&quot;", '"')
-    for o in options:
-        o = o.replace("&#039;", "'")
-    return options
-
-def fixQuotesStr(str):
+def fixHTMLFormatStr(str):
     str = str.replace("&quot;", '"')
     str = str.replace("&#039;", "'")
     str = str.replace("&amp;", '&')
     return str
 
+def fixHTMLFormat(options):
+    fixedOptions = []
+    for o in options:
+        newStr = fixHTMLFormatStr(o)
+        fixedOptions.append(newStr)
+    return fixedOptions
+
 def format(question, options, answer):
     optionNum = 1
     payload = question + '\n'
-    optionStr = 
+    for o in options:
+        payload += ('\t' + str(optionNum) + ". " + o + '\n')
+        optionNum += 1
+    payload += "\tChoose correct numbered option.\n"
+    return payload
+
+def getCorrectAnswer(ans, options):
+    num = 1
+    for o in options:
+        if o == ans:
+            return num
+        num += 1
+    return -1
+
+def getIncorrectMsg(ans, options):
+    msg = "That's incorrect. The correct answer was "
+    num = getCorrectAnswer(ans, options)
+    msg += (str(num) + ". " + ans)
+    return msg
 
 # function to get trivia json info:
 def loadQuestion():
@@ -52,9 +70,9 @@ def loadQuestion():
         question = jsonData["results"][0]["question"]
         options  = jsonData["results"][0]["incorrect_answers"]
         answer   = jsonData["results"][0]["correct_answer"]
-        question = fixQuotesStr(question)
-        answer   = fixQuotesStr(answer)
-        options  = fixQuotes(options)
+        question = fixHTMLFormatStr(question)
+        answer   = fixHTMLFormatStr(answer)
+        options  = fixHTMLFormat(options)
         options.append(answer)
         random.shuffle(options)
         fullQuestion = [question, options, answer]
@@ -85,9 +103,15 @@ print('Server listening on ' + str(hostIP) + ':' + str(serverPort))
 welcome  = 'Welcome to Client-Server-Trivia! Would you like to play? (yes or no)'
 newRound = 'Wanna play again? (yes or no)'
 thanks   = 'Thanks for playing, bye!\n'
+oopsMsg  = 'Oops. That is incorrect. The correct answer was '
+correct  = "That's correct, well done!"
 
 # buffer size in bytes accepted by connection socket:
 BUFSIZE = 2048
+
+# for holding the question options and correct answer:
+options = []
+answer = ''
 
 # new socket connection is created with client after handshake:
 while True:
@@ -101,27 +125,47 @@ while True:
     while True:
         msgRcv = connectionSocket.recv(BUFSIZE).decode()
         print('from client: ' + msgRcv)
-        if msgRcv == "init":
-            sendMsg = welcome
-        elif msgRcv == "yes":
-            fullQuestion = loadQuestion()
-            question = fullQuestion[0]
-            options = fullQuestion[1]
-            answer = fullQuestion[2]
-            payload = format(question, options, answer)
-            print('\nSending>>>>>>>>')
-            print("question: " + question)
-            print("options: ")
-            printOptions(options)
-            print("answer: " + answer)
-            connectionSocket.send(question.encode())
-            sendMsg = newRound
-        elif msgRcv == "no":
-            sendMsg = thanks
-
-        print('\nSending>>>>>>>>')
-        connectionSocket.send(sendMsg.encode())
-        print(sendMsg)
+        try:
+            if int(msgRcv) == getCorrectAnswer(answer, options):
+                payload = correct
+                print('\nSending>>>>>>>>')
+                connectionSocket.send(payload.encode())
+                print(payload)
+                continue
+        except ValueError:
+            try:
+                if int(msgRcv) != getCorrectAnswer(answer, options):
+                    payload = getIncorrectMsg(answer, options)
+                    print('\nSending>>>>>>>>')
+                    connectionSocket.send(payload.encode())
+                    print(payload)
+                    continue
+            except ValueError:
+                payload = ''
+        finally:
+            if msgRcv == "init":
+                payload = welcome
+                print('\nSending>>>>>>>>')
+                connectionSocket.send(payload.encode())
+                print(payload)
+            elif msgRcv == "yes":
+                fullQuestion = loadQuestion()
+                question = fullQuestion[0]
+                options = fullQuestion[1]
+                answer = fullQuestion[2]
+                payload = format(question, options, answer)
+                print('\nSending>>>>>>>>')
+                connectionSocket.send(payload.encode())
+                print(payload)
+            elif msgRcv == "no":
+                payload = thanks
+                connectionSocket.send(payload.encode())
+                break
+            elif msgRcv != "yes" and msgRcv != "no":
+                payload = getIncorrectMsg(answer, options)
+                print('\nSending>>>>>>>>')
+                print(payload)
+                connectionSocket.send(payload.encode())
         continue
 
 connectionSocket.close()

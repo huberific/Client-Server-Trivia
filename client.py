@@ -60,7 +60,7 @@ while True:
     msgBack = clientSocket.recv(BUFSIZE)
     
     # print message length and message received from server:
-    print('server: ' + msgBack.decode())
+    print('\nserver: ' + msgBack.decode())
     
     msg = input ("client: ")
     msg = msg.rstrip('\n')
