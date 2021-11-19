@@ -41,26 +41,38 @@ clientSocket.connect((server, serverPort))
 # msg = method + ' ' + path + ' ' + version + '\r\nHost:' + server + '\r\n\r\n'
 
 msg = "init"
+msgBack = ''
+correctMsg = "That's correct"
+incorrectMsg = "That's incorrect"
+finalMsg = "Thanks for playing, bye"
 
 count = 0
 
 # size of buffer to receive message in bytes:
 BUFSIZE = 4096
     
-
 while True:
-    if msg == "no":
+    if msg == "\q":
         clientSocket.close()
         break
 
-    # send bytes to server, then wait for response:
-    clientSocket.send(msg.encode())
+    if correctMsg not in msgBack and incorrectMsg not in msgBack:
+        # send bytes to server, then wait for response:
+        clientSocket.send(msg.encode())
 
     # place characters from server in variable:
-    msgBack = clientSocket.recv(BUFSIZE)
+    msgBack = clientSocket.recv(BUFSIZE).decode()
     
     # print message length and message received from server:
-    print('\nserver: ' + msgBack.decode())
+    print('\nserver: ' + msgBack)
     
-    msg = input ("client: ")
-    msg = msg.rstrip('\n')
+    if finalMsg in msgBack:
+        print("Good-bye!")
+        break
+    
+    if correctMsg not in msgBack and incorrectMsg not in msgBack:
+        msg = input ("client: ")
+        if msg == "":
+            msg = "invalid"
+        msg = msg.rstrip('\n')
+

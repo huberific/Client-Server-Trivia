@@ -22,21 +22,28 @@
 import socket
 import random
 import urllib.request, json
+import html         # for fixing html special characters
+from html.parser import HTMLParser
+import time # for pausing momentarily
+
+# free trivia api: https://opentdb.com/api_config.php
+triviaAPILink = "https://opentdb.com/api.php?amount=1&difficulty=easy"
 
 def printOptions(options):
     for o in options:
         print(o)
 
-def fixHTMLFormatStr(str):
-    str = str.replace("&quot;", '"')
-    str = str.replace("&#039;", "'")
-    str = str.replace("&amp;", '&')
-    return str
+# fix HTML characters
+# https://www.geeksforgeeks.org/python-convert-html-characters-to-strings/kkj
+def fixHTMLChars(str):
+    h = html.parser
+    newStr = h.unescape(str)
+    return newStr
 
 def fixHTMLFormat(options):
     fixedOptions = []
     for o in options:
-        newStr = fixHTMLFormatStr(o)
+        newStr = fixHTMLChars(o)
         fixedOptions.append(newStr)
     return fixedOptions
 
@@ -65,13 +72,13 @@ def getIncorrectMsg(ans, options):
 
 # function to get trivia json info:
 def loadQuestion():
-    with urllib.request.urlopen("https://opentdb.com/api.php?amount=1") as url:
+    with urllib.request.urlopen(triviaAPILink) as url:
         jsonData = json.loads(url.read().decode()) # returns json data
         question = jsonData["results"][0]["question"]
         options  = jsonData["results"][0]["incorrect_answers"]
         answer   = jsonData["results"][0]["correct_answer"]
-        question = fixHTMLFormatStr(question)
-        answer   = fixHTMLFormatStr(answer)
+        question = fixHTMLChars(question)
+        answer   = fixHTMLChars(answer)
         options  = fixHTMLFormat(options)
         options.append(answer)
         random.shuffle(options)
@@ -100,10 +107,10 @@ print('Server listening on ' + str(hostIP) + ':' + str(serverPort))
 
 # data package to be sent:
 
-welcome  = 'Welcome to Client-Server-Trivia! Would you like to play? (yes or no)'
-newRound = 'Wanna play again? (yes or no)'
-thanks   = 'Thanks for playing, bye!\n'
-oopsMsg  = 'Oops. That is incorrect. The correct answer was '
+welcome  = "Welcome to Client-Server-Trivia! Would you like to play? ('yes' to continue or '/q' to quit)"
+newRound = "Wanna play again? ('yes' to continue or '/q' to quit)"
+thanks   = "Thanks for playing, bye!\n"
+oopsMsg  = "Oops. That's incorrect. The correct answer was "
 correct  = "That's correct, well done!"
 
 # buffer size in bytes accepted by connection socket:
@@ -112,9 +119,10 @@ BUFSIZE = 2048
 # for holding the question options and correct answer:
 options = []
 answer = ''
+exit = "n"
 
 # new socket connection is created with client after handshake:
-while True:
+while exit is not "y":
     # client knocks on door and a new socket, connectionSocket, is created:
     connectionSocket, addr = serverSocket.accept()      
     # [3> tutorial ref for printing address info:
@@ -125,21 +133,26 @@ while True:
     while True:
         msgRcv = connectionSocket.recv(BUFSIZE).decode()
         print('from client: ' + msgRcv)
+        answered = "n"
+        exit = "n"
+        if msgRcv == '':
+            msgRcv = 'invalid'
+
         try:
             if int(msgRcv) == getCorrectAnswer(answer, options):
                 payload = correct
                 print('\nSending>>>>>>>>')
                 connectionSocket.send(payload.encode())
+                answered = "y"
                 print(payload)
-                continue
         except ValueError:
             try:
                 if int(msgRcv) != getCorrectAnswer(answer, options):
                     payload = getIncorrectMsg(answer, options)
                     print('\nSending>>>>>>>>')
                     connectionSocket.send(payload.encode())
+                    answered = "y"
                     print(payload)
-                    continue
             except ValueError:
                 payload = ''
         finally:
@@ -157,15 +170,22 @@ while True:
                 print('\nSending>>>>>>>>')
                 connectionSocket.send(payload.encode())
                 print(payload)
-            elif msgRcv == "no":
+            elif msgRcv == "/q":
                 payload = thanks
                 connectionSocket.send(payload.encode())
+                exit = "y"
                 break
-            elif msgRcv != "yes" and msgRcv != "no":
+            elif answered == "n":
                 payload = getIncorrectMsg(answer, options)
                 print('\nSending>>>>>>>>')
                 print(payload)
                 connectionSocket.send(payload.encode())
+            if msgRcv != "init" and msgRcv != "yes" and exit == "n":
+                payload = newRound
+                time.sleep(1)
+                connectionSocket.send(payload.encode())
+                print(payload)
+                payload = 'invalid'
         continue
 
 connectionSocket.close()
