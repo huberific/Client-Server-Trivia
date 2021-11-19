@@ -47,13 +47,13 @@ def fixHTMLFormat(options):
         fixedOptions.append(newStr)
     return fixedOptions
 
-def format(question, options, answer):
+def format(category, question, options, answer):
+    payload = "\n\n\tCatagory - " + category + '\n\t' + question + '\n'
     optionNum = 1
-    payload = question + '\n'
     for o in options:
-        payload += ('\t' + str(optionNum) + ". " + o + '\n')
+        payload += ('\t\t' + str(optionNum) + ". " + o + '\n')
         optionNum += 1
-    payload += "\tChoose correct numbered option.\n"
+    payload += "\tEnter your answer by its number.\n"
     return payload
 
 def getCorrectAnswer(ans, options):
@@ -70,6 +70,12 @@ def getIncorrectMsg(ans, options):
     msg += (str(num) + ". " + ans)
     return msg
 
+def getInvalidMsg(ans, options):
+    msg = "That's an invalid answer. The correct answer was "
+    num = getCorrectAnswer(ans, options)
+    msg += (str(num) + ". " + ans)
+    return msg
+
 # function to get trivia json info:
 def loadQuestion():
     with urllib.request.urlopen(triviaAPILink) as url:
@@ -77,12 +83,14 @@ def loadQuestion():
         question = jsonData["results"][0]["question"]
         options  = jsonData["results"][0]["incorrect_answers"]
         answer   = jsonData["results"][0]["correct_answer"]
+        category = jsonData["results"][0]["category"]
         question = fixHTMLChars(question)
         answer   = fixHTMLChars(answer)
+        category = fixHTMLChars(category)
         options  = fixHTMLFormat(options)
         options.append(answer)
         random.shuffle(options)
-        fullQuestion = [question, options, answer]
+        fullQuestion = [category, question, options, answer]
         return fullQuestion
 
 # [ref> https://www.delftstack.com/howto/python/dict-to-string-in-python/
@@ -107,7 +115,8 @@ print('Server listening on ' + str(hostIP) + ':' + str(serverPort))
 
 # data package to be sent:
 
-welcome  = "Welcome to Client-Server-Trivia! Would you like to play? ('yes' to continue or '/q' to quit)"
+welcome  = "Welcome to Client-Server-Trivia! Would you like to play? ('yes' " +\
+           "to continue or '/q' to quit)"
 newRound = "Wanna play again? ('yes' to continue or '/q' to quit)"
 thanks   = "Thanks for playing, bye!\n"
 oopsMsg  = "Oops. That's incorrect. The correct answer was "
@@ -163,10 +172,11 @@ while exit is not "y":
                 print(payload)
             elif msgRcv == "yes":
                 fullQuestion = loadQuestion()
-                question = fullQuestion[0]
-                options = fullQuestion[1]
-                answer = fullQuestion[2]
-                payload = format(question, options, answer)
+                category = fullQuestion[0]
+                question = fullQuestion[1]
+                options = fullQuestion[2]
+                answer = fullQuestion[3]
+                payload = format(category, question, options, answer)
                 print('\nSending>>>>>>>>')
                 connectionSocket.send(payload.encode())
                 print(payload)
@@ -189,4 +199,3 @@ while exit is not "y":
         continue
 
 connectionSocket.close()
-# note, serverSocket remains open to welcome new handshakes from clients

@@ -1,7 +1,7 @@
 ################################################################################
-# Due Date:    10-17-2021
+# Due Date:    12-05-2021
 # Author:      Aaron Huber
-# Title:       Project 1 - Sockets and HTTP (Client File 1) 
+# Title:       Project 4 - Client-Server Chat
 # Description: This program creates the client-side socket for sending
 #              messages and receiving responses.
 #
@@ -44,6 +44,7 @@ msg = "init"
 msgBack = ''
 correctMsg = "That's correct"
 incorrectMsg = "That's incorrect"
+invalidMsg = "That's an invalid answer"
 finalMsg = "Thanks for playing, bye"
 
 count = 0
@@ -70,7 +71,8 @@ while True:
         print("Good-bye!")
         break
     
-    if correctMsg not in msgBack and incorrectMsg not in msgBack:
+    if (correctMsg not in msgBack and incorrectMsg not in msgBack and 
+       invalidMsg not in msgBack):
         msg = input ("client: ")
         if msg == "":
             msg = "invalid"
