@@ -1,7 +1,7 @@
 ###################################################################################
-# Due Date:    12-05-2021
+# Date:        12-05-2021
 # Author:      Aaron Huber
-# Title:       Project 4 - Client-Server-Trivia
+# Title:       Client-Server-Trivia
 # Description: This program creates the client-side socket component of the
 #              Client-Server-Chat interface. It receives trivia questions from
 #              the server and sends answers.
