@@ -1,13 +1,13 @@
 # Client-Server-Trivia
 
-##Overview
+## Overview
 This program is a shell based text game where a client plays trivia with a server using Python sockets. The following website was used for free trivia API:
 
 https://opentdb.com/api_config.php
 
 The server program pulls 1 question per round using "easy" settings.
 
-##Instructions
+## Instructions
 To run the program, download the files into a Mac or Linux machine directory. For best results open two terminal shells.
 
 In terminal one, enter the following command to fire up the server-side program:
@@ -26,7 +26,7 @@ In terminal two, enter the following command to fire up the client-side program:
   
   Once the client program is running, follow the directions to play the trivia game. A example screenshot are included below.
   
-  ##Sample Output
+  ## Sample Output
   ![image](https://user-images.githubusercontent.com/54946106/145160640-7a849bce-51fa-4c6a-af5f-538e8eabd987.png)
 
 
