@@ -12,15 +12,19 @@ To run the program, download the files into a Mac or Linux machine directory. Fo
 
 In terminal one, enter the following command to fire up the server-side program:
 
+  ```
   python3 server.py
+  ```
   
   ![image](https://user-images.githubusercontent.com/54946106/145160438-c2719ef0-7e72-4407-8c3f-c8a8940b5c16.png)
 
   
 In terminal two, enter the following command to fire up the client-side program:
 
-  python3 client.py 50489<br>
-  *NOTE: 50489 is the randomly generated port number created by the server, copy this from terminal one.*
+  ```
+  python3 client.py 50489
+  ``` 
+  <br> *NOTE: 50489 is the randomly generated port number created by the server, copy this from terminal one.*
   
   ![image](https://user-images.githubusercontent.com/54946106/145160546-a882a51a-9c83-4151-a68b-dcbb78683b61.png)
   
