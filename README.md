@@ -28,7 +28,7 @@ In terminal two, enter the following command to fire up the client-side program:
   
   ![image](https://user-images.githubusercontent.com/54946106/145160546-a882a51a-9c83-4151-a68b-dcbb78683b61.png)
   
-  Once the client program is running, follow the directions to play the trivia game. A example screenshot are included below.
+  Once the client program is running, follow the directions to play the trivia game. A example screenshot is included below.
   
   ## Sample Output
   ![image](https://user-images.githubusercontent.com/54946106/145160640-7a849bce-51fa-4c6a-af5f-538e8eabd987.png)
